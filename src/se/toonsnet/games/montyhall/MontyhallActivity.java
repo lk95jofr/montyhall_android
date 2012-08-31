@@ -4,6 +4,7 @@ import java.util.Random;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -17,15 +18,18 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 	private EditText editTextGames;
 	
 	private ProgressBar progressBar;
+	private ProgressBar progressBarCount;
 	
+	private int count = 0;
 	private int numberOfGames = 0;
 	private int nrOfWinnings = 0;
-	private int mProgressStatus = 0;
+//	private int mProgressStatus = 0;
 	
 	private final Door[] doorArray = new Door[3];
 
 	private final Random randomGenerator = new Random();
 	
+	private Handler mHandler = new Handler();
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -40,6 +44,8 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 		
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		progressBar.setClickable(false);
+		progressBarCount = (ProgressBar) findViewById(R.id.progressBarCount);
+		progressBarCount.setClickable(false);
 		
 		doorArray[0] = new Door(1);
 		doorArray[1] = new Door(2);
@@ -57,8 +63,11 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 		String stringNumberOfGames = editTextGames.getText().toString();
 		numberOfGames = (stringNumberOfGames.isEmpty() ? 1 : Integer.parseInt(stringNumberOfGames));
 		
+		progressBar.setMax(numberOfGames);
+		progressBarCount.setMax(numberOfGames);
+		
 		nrOfWinnings = 0;
-		mProgressStatus = 0;
+//		mProgressStatus = 0;
 	}
 	
 	private void initilizeGame() {
@@ -78,26 +87,44 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 	private void startGame() {
 		resetGame();
 		
-		for (int i = 0; i <= numberOfGames; i++) {
-			initilizeGame();
+		new Thread(new Runnable() {
+			public void run() {
+				while (count++ <= numberOfGames) {
+					initilizeGame();
+					
+					// Open the door with no price that has not been chosen
+					openFakeDoor();
+					
+					// Player switch door
+					switchDoor();
 			
-			// Open the door with no price that has not been chosen
-			openFakeDoor();
-			
-			// Player switch door
-			switchDoor();
-	
-			for (Door d : doorArray) {
-				if (d.isChosen() && d.hasPrice()) {
-					nrOfWinnings++;
+					for (Door d : doorArray) {
+						if (d.isChosen() && d.hasPrice()) {
+							nrOfWinnings++;
+						}
+					}
+					
+//					mProgressStatus = ((nrOfWinnings * 100) / numberOfGames);
+					
+					// Update the progress bar
+					mHandler.post(new Runnable() {
+						public void run() {
+							progressBarCount.setProgress(count);
+							progressBar.setProgress(nrOfWinnings);
+//							progressBar.setProgress(mProgressStatus);
+						}
+					});
+					
+//					try {
+//						Thread.sleep(10);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
 				}
 			}
-		}
+		}).start();		
 		
-		mProgressStatus = ((nrOfWinnings * 100) / numberOfGames);
-		progressBar.setProgress(mProgressStatus);
-		
-		Toast.makeText(getApplicationContext(), mProgressStatus + "%, Wins: " + nrOfWinnings, Toast.LENGTH_SHORT).show();
+//		Toast.makeText(getApplicationContext(), mProgressStatus + "%, Wins: " + nrOfWinnings, Toast.LENGTH_SHORT).show();
 	}
 		
 	private int randomNumberGenerator() {

@@ -25,13 +25,17 @@
             android:text="@string/startButton" />
 
         <ProgressBar
+            android:id="@+id/progressBarCount"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="100"
-            android:maxHeight="20dip"  
-						android:minHeight="20dip" 
             android:visibility="visible" />
 
     </LinearLayout>
