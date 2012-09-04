@@ -10,6 +10,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MontyhallActivity extends Activity implements OnClickListener {
@@ -20,10 +21,13 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 	private ProgressBar progressBar;
 	private ProgressBar progressBarCount;
 	
+	private TextView tvCount;
+	private TextView tvWin;
+	
 	private int count = 0;
 	private int numberOfGames = 0;
 	private int nrOfWinnings = 0;
-//	private int mProgressStatus = 0;
+	private int mProgressStatus = 0;
 	
 	private final Door[] doorArray = new Door[3];
 
@@ -47,6 +51,9 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 		progressBarCount = (ProgressBar) findViewById(R.id.progressBarCount);
 		progressBarCount.setClickable(false);
 		
+		tvCount = (TextView) findViewById(R.id.textViewCount);
+		tvWin = (TextView) findViewById(R.id.textViewWin);
+		
 		doorArray[0] = new Door(1);
 		doorArray[1] = new Door(2);
 		doorArray[2] = new Door(3);
@@ -63,11 +70,17 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 		String stringNumberOfGames = editTextGames.getText().toString();
 		numberOfGames = (stringNumberOfGames.isEmpty() ? 1 : Integer.parseInt(stringNumberOfGames));
 		
-		progressBar.setMax(numberOfGames);
 		progressBarCount.setMax(numberOfGames);
+		progressBarCount.setProgress(0);
+		
+		progressBar.setMax(100);
+		progressBar.setProgress(0);
+		
+		tvCount.setText("0/" + numberOfGames);
+		tvWin.setText("0%");
 		
 		nrOfWinnings = 0;
-//		mProgressStatus = 0;
+		mProgressStatus = 0;
 	}
 	
 	private void initilizeGame() {
@@ -89,7 +102,7 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 		
 		new Thread(new Runnable() {
 			public void run() {
-				while (count++ <= numberOfGames) {
+				for (count = 0; count < numberOfGames; count++) {
 					initilizeGame();
 					
 					// Open the door with no price that has not been chosen
@@ -104,14 +117,17 @@ public class MontyhallActivity extends Activity implements OnClickListener {
 						}
 					}
 					
-//					mProgressStatus = ((nrOfWinnings * 100) / numberOfGames);
+					mProgressStatus = ((nrOfWinnings * 100) / numberOfGames);
 					
 					// Update the progress bar
 					mHandler.post(new Runnable() {
 						public void run() {
 							progressBarCount.setProgress(count);
-							progressBar.setProgress(nrOfWinnings);
-//							progressBar.setProgress(mProgressStatus);
+//							progressBar.setProgress(nrOfWinnings);
+							progressBar.setProgress(mProgressStatus);
+							
+							tvCount.setText(count + "/" + numberOfGames);
+							tvWin.setText(mProgressStatus + "%");
 						}
 					});
 					
